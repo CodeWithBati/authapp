@@ -11,7 +11,6 @@ export async function POST(request: NextRequest) {
     const reqBody = await request.json();
 
     const { username, email, password } = reqBody;
-    console.log(reqBody);
 
     const user = await User.findOne({ email });
 
@@ -25,16 +24,6 @@ export async function POST(request: NextRequest) {
     const salt = await bcryptjs.genSalt(10);
     const hashPassword = await bcryptjs.hash(password, salt);
 
-    // let newPassword = password.toString();
-    // const salt = await bcryptjs.genSalt(5);
-
-    // bcryptjs.hash(newPassword, salt, function(err, hash) {});
-    // const hashPassword = await bcryptjs.hash(
-    //   password,
-    //   salt,
-    //   function (err, hash) {}
-    // );
-
     const newUser = new User({
       username,
       email,
@@ -42,19 +31,16 @@ export async function POST(request: NextRequest) {
     });
 
     const savedUser = await newUser.save();
-    console.log(savedUser);
 
     // Send Verification Email
     await sendEmail({ email, emailType: "RESET", userId: savedUser._id });
 
-    console.log("email is send");
     return NextResponse.json({
       message: "User register successfully",
       success: true,
       savedUser,
     });
   } catch (error: any) {
-    console.log("am here");
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
